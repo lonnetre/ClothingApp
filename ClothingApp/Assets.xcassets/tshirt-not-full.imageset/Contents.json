@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "Blue_T_Shirt_PNG_Clip_Art-3104 copy.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
