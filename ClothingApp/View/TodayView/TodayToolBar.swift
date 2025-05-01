@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TodayToolbar: View {
+struct TodayToolBar: View {
     let temperature: String
     let onCreateOutfit: () -> Void
     let onSwapOutfits: () -> Void
@@ -47,7 +47,7 @@ struct TodayToolbar: View {
         .overlay(
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(Color(UIColor.systemGray5)),
+                .foregroundStyle(Color(UIColor.systemGray5)),
             alignment: .top
         )
     }

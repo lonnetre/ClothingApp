@@ -59,7 +59,7 @@ struct FirstStepView: View {
                     // Screen content: T-shirt and scanning elements
                     ZStack {
                         // T-shirt
-                        Image("tshirt")
+                        Image("tshirt-full")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 150, height: 150)
@@ -206,7 +206,7 @@ struct FirstStepView: View {
 }
 
 // MARK: - Preview
-struct TShirtScannerView_Previews: PreviewProvider {
+struct FirstStepView_Previews: PreviewProvider {
     static var previews: some View {
         FirstStepView()
     }

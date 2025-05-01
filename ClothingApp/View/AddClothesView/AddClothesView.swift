@@ -8,39 +8,165 @@
 import SwiftUI
 
 struct AddClothesView: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var presentMe: Bool
+    @State private var showNextButton = false
+    @State private var currentStep: Int = 1
+
+    let checklist = [
+        "You’re on a plain background",
+        "Clothing is fully visible",
+        "Good lighting = best results!"
+    ]
     
-    @Binding var presentMe : Bool    // This is how you trigger the dismissal
-    
-    var body: some View {
-        VStack {
-            
-            HStack {
-            
-            Text("Introduction")
-                .font(.title2)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.leading)
-                .padding([.top, .leading])
-            
-            Spacer ()
-            
-                // This should be the button to return to the main screen that NOW IT'S FINALLY working
-               Button  (action: {
-                   
-                   // Change the value of the Binding
-                   presentMe.toggle()
-                   
-                }, label: {
-                Image(systemName: "xmark.circle")
-                .foregroundColor(Color.gray)
-                })
-                    .padding([.top, .trailing])
-            }
-            
-             Divider()
-                .padding(.horizontal)
-                .frame(height: 3.0)
-                .foregroundColor(Color.gray)
+    var stepTitle: String {
+        switch currentStep {
+        case 1: return "Scan the clothing"
+        case 2: return "Check if the photo is right"
+        default: return "Done"
         }
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(alignment: .leading) {
+                // Dismiss Button
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        presentMe = false
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.black)
+                            .accessibilityLabel("Close")
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    .padding(.top)
+                }
+                .padding(.horizontal)
+
+                // Title
+                Text("Step \(currentStep)/3: \(stepTitle)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .padding(.leading)
+
+                // Scanner View
+                HStack {
+                    // Left button
+                    if showNextButton && currentStep > 1{
+                        Button(action: {
+                            withAnimation {
+                                currentStep -= 1
+                                showNextButton = false
+                            }
+                        }) {
+                            Image(systemName: "chevron.left.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundStyle(Color(UIColor.systemGray))
+                        }
+                        .padding(.leading, 20)
+                        .transition(.scale.combined(with: .opacity))
+                        
+                        Spacer()
+                    } else {
+                        Spacer()
+                    }
+                    
+                    if currentStep == 1 {
+                        FirstStepView(onComplete: {
+                            showNextButton = true
+                        })
+                    } else if currentStep == 2 {
+                        SecondStepView(onComplete: {
+                            showNextButton = true
+                        })
+                    }
+                    
+                    // Right Button - appears when animation completes
+                    if showNextButton {
+                        Spacer()
+                        Button(action: {
+                            withAnimation {
+                                currentStep += 1
+                                showNextButton = false
+                            }
+                        }) {
+                            Image(systemName: "chevron.right.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundStyle(Color(UIColor.systemGray))
+                        }
+                        .padding(.trailing, 20)
+                        .transition(.scale.combined(with: .opacity))
+                    } else {
+                        Spacer()
+                    }
+                }
+
+                Spacer(minLength: 20)
+
+                // Checklist
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Make sure:")
+                        .font(.body)
+                        .bold()
+
+                    ForEach(checklist, id: \.self) { item in
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.blue)
+                            Text(item)
+                                .font(.system(size: 14))
+                        }
+                    }
+                }
+                .padding(.horizontal)
+
+                Spacer(minLength: 20)
+
+                // Photo Buttons
+                HStack(spacing: 16) {
+                    Button(action: {
+                        // Add camera logic here
+                    }) {
+                        PhotoOptionButton(icon: "camera.fill", label: "Take a photo", width: geometry.size.width / 2.3)
+                    }
+
+                    Button(action: {
+                        // Add photo picker logic here
+                    }) {
+                        PhotoOptionButton(icon: "photo.fill.on.rectangle.fill", label: "Use already\nexisting photo", width: geometry.size.width / 2.3)
+                    }
+                }
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+struct PhotoOptionButton: View {
+    let icon: String
+    let label: String
+    let width: CGFloat
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(.black)
+            Text(label)
+                .font(.footnote)
+                .foregroundStyle(.black)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(width: width, height: 70)
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(20)
     }
 }
