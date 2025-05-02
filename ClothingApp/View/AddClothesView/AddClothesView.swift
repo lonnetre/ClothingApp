@@ -23,7 +23,7 @@ struct AddClothesView: View {
         switch currentStep {
         case 1: return "Scan the clothing"
         case 2: return "Check if the photo is right"
-        default: return "Done"
+        default: return "Add the tags"
         }
     }
 
@@ -56,7 +56,7 @@ struct AddClothesView: View {
                 // Scanner View
                 HStack {
                     // Left button
-                    if showNextButton && currentStep > 1{
+                    if showNextButton {
                         Button(action: {
                             withAnimation {
                                 currentStep -= 1
@@ -66,7 +66,7 @@ struct AddClothesView: View {
                             Image(systemName: "chevron.left.circle.fill")
                                 .resizable()
                                 .frame(width: 30, height: 30)
-                                .foregroundStyle(Color(UIColor.systemGray))
+                                .foregroundStyle(currentStep == 1 ? Color(UIColor.clear) : Color(UIColor.systemGray))
                         }
                         .padding(.leading, 20)
                         .transition(.scale.combined(with: .opacity))
@@ -82,6 +82,10 @@ struct AddClothesView: View {
                         })
                     } else if currentStep == 2 {
                         SecondStepView(onComplete: {
+                            showNextButton = true
+                        })
+                    } else if currentStep == 3 {
+                        ThirdStepView(onComplete: {
                             showNextButton = true
                         })
                     }
