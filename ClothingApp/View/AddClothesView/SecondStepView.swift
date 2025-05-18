@@ -23,7 +23,6 @@ struct SecondStepView: View {
     )
     
     // Computed properties for animation states
-    private var phoneRotation: Double { animationPhase == .initial ? 90 : 0 }
     private var phoneOffset: CGFloat { animationPhase == .initial ? 100 : 0 }
     private var tshirtOpacity: Double {
         animationPhase == .initial || animationPhase == .phoneRaised ? 0 : 1
@@ -78,14 +77,7 @@ struct SecondStepView: View {
                     }
                     .animation(.easeInOut(duration: durations.transition), value: isSuccessState)
                 }
-                // rotation for the phone
-                .rotation3DEffect(
-                    .degrees(phoneRotation),
-                    axis: (x: 1.0, y: 0.0, z: 0.0),
-                    perspective: 0.3
-                )
-                .offset(y: phoneOffset)
-                .animation(.spring(response: durations.raise, dampingFraction: 0.7), value: animationPhase)
+                .animation(.spring(response: 0, dampingFraction: 0.7), value: animationPhase)
                 
                 Spacer()
             }
@@ -172,20 +164,18 @@ struct SecondStepView: View {
         runDelayed(0.5) {
             animationPhase = .phoneRaised
             
-            runDelayed(durations.raise) {
-                animationPhase = .tshirtVisible
+            animationPhase = .tshirtVisible
+            
+            // After 3 seconds, transition from error state to success state
+            runDelayed(3.0) {
+                withAnimation(.easeInOut(duration: durations.transition)) {
+                    isSuccessState = true
+                }
                 
-                // After 3 seconds, transition from error state to success state
-                runDelayed(3.0) {
-                    withAnimation(.easeInOut(duration: durations.transition)) {
-                        isSuccessState = true
-                    }
-                    
-                    // Call onComplete after showing the success state
-                    runDelayed(1.0) {
-                        animationPhase = .complete
-                        onComplete()
-                    }
+                // Call onComplete after showing the success state
+                runDelayed(1.0) {
+                    animationPhase = .complete
+                    onComplete()
                 }
             }
         }

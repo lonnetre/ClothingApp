@@ -38,7 +38,6 @@ struct ContentView: View {
             // Add Clothes View
             .popover(isPresented: $showAddClothesPopover) {
                 AddClothesView(presentMe: $presentPopup)
-                    .font(.footnote)
             }
             
             .frame(maxWidth: .infinity, maxHeight: .infinity)

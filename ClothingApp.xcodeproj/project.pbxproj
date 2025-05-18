@@ -10,9 +10,22 @@
 		549E7EF72DBCE41200E57E11 /* ClothingApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClothingApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		54023ABB2DD9DFAD0007FF82 /* Exceptions for "ClothingApp" folder in "ClothingApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 549E7EF62DBCE41200E57E11 /* ClothingApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		549E7EF92DBCE41200E57E11 /* ClothingApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				54023ABB2DD9DFAD0007FF82 /* Exceptions for "ClothingApp" folder in "ClothingApp" target */,
+			);
 			path = ClothingApp;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,12 @@
 				DEVELOPMENT_TEAM = 425R78B277;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClothingApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is used for capturing photos.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Additions usage";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs this permission to save captured photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -284,6 +303,12 @@
 				DEVELOPMENT_TEAM = 425R78B277;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ClothingApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is used for capturing photos.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Additions usage";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs this permission to save captured photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

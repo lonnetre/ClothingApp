@@ -17,14 +17,12 @@ struct ThirdStepView: View {
     
     // Animation durations
     private let durations = (
-        raise: 1.5,
         appear: 1.0,
         complete: 0.5,
         transition: 0.7
     )
     
     // Computed properties for animation states
-    private var phoneRotation: Double { animationPhase == .initial ? 90 : 0 }
     private var phoneOffset: CGFloat { animationPhase == .initial ? 100 : 0 }
     private var tshirtOpacity: Double {
         animationPhase == .initial || animationPhase == .phoneRaised ? 0 : 1
@@ -96,14 +94,7 @@ struct ThirdStepView: View {
                     }
                     .animation(.easeInOut(duration: durations.transition), value: isAnimationFinished)
                 }
-                // rotation for the phone
-                .rotation3DEffect(
-                    .degrees(phoneRotation),
-                    axis: (x: 1.0, y: 0.0, z: 0.0),
-                    perspective: 0.3
-                )
-                .offset(y: phoneOffset)
-                .animation(.spring(response: durations.raise, dampingFraction: 0.7), value: animationPhase)
+                .animation(.spring(response: durations.appear, dampingFraction: 0.7), value: animationPhase)
                 
                 Spacer()
             }
@@ -117,15 +108,13 @@ struct ThirdStepView: View {
         runDelayed(0.5) {
             animationPhase = .phoneRaised
             
-            runDelayed(durations.raise) {
-                animationPhase = .tshirtVisible
-                
-                // Call onComplete after showing the success state
-                runDelayed(1.0) {
-                    animationPhase = .complete
-                    isAnimationFinished = true
-                    onComplete()
-                }
+            animationPhase = .tshirtVisible
+            
+            // Call onComplete after showing the success state
+            runDelayed(1.0) {
+                animationPhase = .complete
+                isAnimationFinished = true
+                onComplete()
             }
         }
     }

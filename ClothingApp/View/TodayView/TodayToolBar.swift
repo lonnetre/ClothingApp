@@ -16,9 +16,9 @@ struct TodayToolBar: View {
     var body: some View {
         HStack(spacing: 20) {
             Button(action: onSwapOutfits) {
-                VStack {
-                    Image(systemName: "shuffle")
-                }
+                Image("custom.shuffle.badge.sparkles")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.blue, .gray)
             }
             
             Divider()
@@ -26,9 +26,12 @@ struct TodayToolBar: View {
             
             Button(action: onCreateOutfit) {
                 HStack {
-                    Image(systemName: "rectangle.dashed")
+                    Image("custom.cabinet.fill.badge.plus")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.blue, .gray)
                     Text("Create an outfit")
                         .font(.footnote)
+                        .foregroundStyle(Color(.systemGray))
                 }
             }
             
@@ -37,8 +40,10 @@ struct TodayToolBar: View {
             
             HStack {
                 Image(systemName: "cloud.sun.fill")
+                    .foregroundStyle(Color(.systemGray))
                 Text(temperature)
                     .font(.footnote)
+                    .foregroundStyle(Color(.systemGray))
             }
         }
         .padding(.vertical, 8)

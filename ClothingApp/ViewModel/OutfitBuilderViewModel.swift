@@ -28,9 +28,9 @@ class OutfitBuilderViewModel: ObservableObject {
         
         // Set up tops
         let tops = [
-            ClothingItem(name: "Gray T-Shirt", imageName: "tshirt_gray", category: .tops),
+            ClothingItem(name: "Gray T-Shirt", imageName: "tshirt_cyan", category: .tops),
             ClothingItem(name: "Blue T-Shirt", imageName: "tshirt_blue", category: .tops),
-            ClothingItem(name: "Gray T-Shirt 2", imageName: "tshirt_gray", category: .tops)
+            ClothingItem(name: "Gray T-Shirt 2", imageName: "tshirt_red", category: .tops)
         ]
         clothingPages[.tops] = ClothingPage(items: tops, selectedItemIndex: 1, currentPage: 2, totalPages: 3)
         

@@ -1,7 +1,4 @@
 //
-//  ClothingAppApp.swift
-//  ClothingApp
-//
 //  Created by yehor on 26.04.25.
 //
 
