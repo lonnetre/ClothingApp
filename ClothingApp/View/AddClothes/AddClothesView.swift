@@ -151,11 +151,14 @@ struct AddClothesView: View {
                     }
                     .padding(.horizontal)
                     .frame(maxWidth: .infinity)
-                    .navigationDestination(isPresented: $showVisionView) {
-                        VisionView()
-                    }
+//                    .navigationDestination(isPresented: $showVisionView) {
+//                        VisionView()
+//                    }
                     .fullScreenCover(isPresented: $showCamera) {
                         CameraView()
+                    }
+                    .onChange(of: showCamera) { newValue in
+                        print("showCamera is now: \(newValue)")
                     }
                 }
             }

@@ -2,7 +2,7 @@
 //  CameraManager.swift
 //  CustomCameraApp
 //
-//  Created by Amisha Italiya on 03/10/23.
+//  Created by yehor on 03.06.25.
 //
 
 import Photos
@@ -67,39 +67,46 @@ class CameraManager: ObservableObject {
 	}
 	
     // Method to set up video input from the camera
-	private func setupVideoInput() {
-		do {
+    private func setupVideoInput() {
+        do {
             // Get the default wide-angle camera for video capture
             // AVCaptureDevice is a representation of the hardware device to use
-			let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
-			guard let camera else {
-				print("CameraManager: Video device is unavailable.")
-				status = .unconfigured
-				session.commitConfiguration()
-				return
-			}
-			
+            let discoverySession = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [.builtInWideAngleCamera],
+                mediaType: .video,
+                position: position
+            )
+
+            guard let camera = discoverySession.devices.first else {
+                print("CameraManager: No camera found for position \(position)")
+                status = .unconfigured
+                session.commitConfiguration()
+                return
+            }
+
+            
             // Create an AVCaptureDeviceInput from the camera
-			let videoInput = try AVCaptureDeviceInput(device: camera)
+            let videoInput = try AVCaptureDeviceInput(device: camera)
             
             // Add video input to the session if possible
-			if session.canAddInput(videoInput) {
-				session.addInput(videoInput)
-				videoDeviceInput = videoInput
-				status = .configured
-			} else {
-				print("CameraManager: Couldn't add video device input to the session.")
-				status = .unconfigured
-				session.commitConfiguration()
-				return
-			}
-		} catch {
-			print("CameraManager: Couldn't create video device input: \(error)")
-			status = .failed
-			session.commitConfiguration()
-			return
-		}
-	}
+            if session.canAddInput(videoInput) {
+                session.addInput(videoInput)
+                videoDeviceInput = videoInput
+                status = .configured
+            } else {
+                print("CameraManager: Couldn't add video device input to the session.")
+                status = .unconfigured
+                session.commitConfiguration()
+                return
+            }
+        } catch {
+            print("CameraManager: Couldn't create video device input: \(error)")
+            status = .failed
+            session.commitConfiguration()
+            return
+        }
+    }
+
 	
     // Method to configure the photo output settings
 	private func setupPhotoOutput() {
@@ -125,16 +132,17 @@ class CameraManager: ObservableObject {
 	
     // Method to start capturing
     private func startCapturing() {
-      if status == .configured {
-         // Start running the capture session
-         self.session.startRunning()
-      } else if status == .unconfigured || status == .unauthorized {
-         DispatchQueue.main.async {
-           // Handle errors related to unconfigured or unauthorized states
-           self.alertError = AlertError(title: "Camera Error", message: "Camera configuration failed. Either your device camera is not available or its missing permissions", primaryButtonTitle: "ok", secondaryButtonTitle: nil, primaryAction: nil, secondaryAction: nil)
-           self.shouldShowAlertView = true
-         }
-      }
+        if status == .configured {
+            // Start running the capture session
+            self.session.startRunning()
+        } else if status == .unconfigured || status == .unauthorized {
+            DispatchQueue.main.async {
+                // Handle errors related to unconfigured or unauthorized states
+                self.alertError = AlertError(title: "Camera Error", message: "Camera configuration failed. Either your device camera is not available or its missing permissions", primaryButtonTitle: "ok", secondaryButtonTitle: nil, primaryAction: nil, secondaryAction: nil)
+                self.shouldShowAlertView = true
+                print("Capture session not started. Status: \(self.status)")
+            }
+        }
     }
 	
     // Method to stop capturing
@@ -216,105 +224,55 @@ class CameraManager: ObservableObject {
 		}
 	}
 	
-//	func switchCamera() {
-//		guard let videoDeviceInput else { return }
-//		
-//		// Remove the current video input
-//		session.removeInput(videoDeviceInput)
-//		
-//		// Add the new video input
-//		setupVideoInput()
-//	}
-    
-    func switchCamera() {
-        sessionQueue.async { [weak self] in
-            guard let self else { return }
-            self.session.beginConfiguration()
-            if let videoInput = self.videoDeviceInput {
-                self.session.removeInput(videoInput)
-            }
-            self.position = self.position == .back ? .front : .back
-            self.setupVideoInput()
-            self.session.commitConfiguration()
-        }
-    }
-
+	func switchCamera() {
+		guard let videoDeviceInput else { return }
+		
+		// Remove the current video input
+		session.removeInput(videoDeviceInput)
+		
+		// Add the new video input
+		setupVideoInput()
+	}
 	
-//	func captureImage() {
-//		sessionQueue.async { [weak self] in
-//			guard let self else { return }
-//            
-//			
-//			var photoSettings = AVCapturePhotoSettings()
-//			
-//			// Capture HEIC photos when supported
-//			if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
-//				photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
-//			}
-//			
-//			// Sets the flash option for the capture
-//            if let device = self.videoDeviceInput?.device, device.isFlashAvailable {
-//				photoSettings.flashMode = self.flashMode
-//			}
-//			
-//			// photoSettings.isHighResolutionPhotoEnabled = true
-//			
-//			// Sets the preview thumbnail pixel format
-//			if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
-//				photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
-//			}
-//			photoSettings.photoQualityPrioritization = .quality
-//			
-//            if let videoConnection = photoOutput.connection(with: .video),
-//               videoConnection.isVideoRotationAngleSupported(90) {
-//                videoConnection.videoRotationAngle = 90 // 90 degrees corresponds to .portrait
-//            }
-//			
-//			cameraDelegate = CameraDelegate { [weak self] image in
-//				self?.capturedImage = image
-//			}
-//			
-//			if let cameraDelegate {
-//				self.photoOutput.capturePhoto(with: photoSettings, delegate: cameraDelegate)
-//			}
-//		}
-//	}
-    func captureImage() {
-        sessionQueue.async { [weak self] in
-            guard let self else { return }
+	func captureImage() {
+		sessionQueue.async { [weak self] in
+			guard let self else { return }
             
-            var photoSettings = AVCapturePhotoSettings()
-            
-            // Capture HEIC photos when supported
-            if self.photoOutput.availablePhotoCodecTypes.contains(.hevc) {
-                photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
-            }
-            
-            // Sets the flash option for the capture
+			
+			var photoSettings = AVCapturePhotoSettings()
+			
+			// Capture HEIC photos when supported
+			if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
+				photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
+			}
+			
+			// Sets the flash option for the capture
             if let device = self.videoDeviceInput?.device, device.isFlashAvailable {
-                photoSettings.flashMode = self.flashMode
+				photoSettings.flashMode = self.flashMode
+			}
+			
+			// photoSettings.isHighResolutionPhotoEnabled = true
+			
+			// Sets the preview thumbnail pixel format
+			if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
+				photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
+			}
+			photoSettings.photoQualityPrioritization = .quality
+			
+            if let videoConnection = photoOutput.connection(with: .video),
+               videoConnection.isVideoRotationAngleSupported(90) {
+                videoConnection.videoRotationAngle = 90 // 90 degrees corresponds to .portrait
             }
-            
-            // Sets the preview thumbnail pixel format
-            if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
-                photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
-            }
-            photoSettings.photoQualityPrioritization = .quality
-            
-            // Remove potentially problematic rotation setting
-            // Let the system handle the orientation
-            
-            self.cameraDelegate = CameraDelegate { [weak self] image in
-                DispatchQueue.main.async {
-                    self?.capturedImage = image
-                }
-            }
-            
-            if let cameraDelegate = self.cameraDelegate {
-                self.photoOutput.capturePhoto(with: photoSettings, delegate: cameraDelegate)
-            }
-        }
-    }
+			
+			cameraDelegate = CameraDelegate { [weak self] image in
+				self?.capturedImage = image
+			}
+			
+			if let cameraDelegate {
+				self.photoOutput.capturePhoto(with: photoSettings, delegate: cameraDelegate)
+			}
+		}
+	}
 }
 
 class CameraDelegate: NSObject, AVCapturePhotoCaptureDelegate {
