@@ -6,6 +6,9 @@ import SwiftUI
 
 @main
 struct ClothingApp: App {
+    init() {
+        UIImageTransformer.register()
+    }
     var body: some Scene {
         WindowGroup {
             ContentView()

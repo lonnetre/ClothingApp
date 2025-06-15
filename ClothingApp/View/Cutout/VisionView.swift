@@ -66,6 +66,8 @@ struct VisionView: View {
             DispatchQueue.main.async {
                 self.cutout = finalImage
                 self.isLoading = false
+
+                saveImageToCoreData(finalImage, tags: ["cutout", "vision"], date: Date())
             }
         }
     }
@@ -79,7 +81,7 @@ struct VisionView: View {
         return normalizedImage
     }
 
-    /// returns mask image with foregorund objects
+    /// returns mask image with foreground objects
     private func subjectMaskImage(from inputImage: CIImage) -> CIImage? {
         /// VNImageRequestHandler allows to perform image analysis requests pertaining to a single image
         let handler = VNImageRequestHandler(ciImage: inputImage)
@@ -127,6 +129,36 @@ struct VisionView: View {
         }
         return UIImage(cgImage: cgImage)
     }
+    
+    func saveImageToDocuments(_ image: UIImage, fileName: String) -> URL? {
+        guard let data = image.jpegData(compressionQuality: 0.9) else { return nil }
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName)
+        
+        do {
+            try data.write(to: url)
+            return url
+        } catch {
+            print("Error saving image: \(error)")
+            return nil
+        }
+    }
+    
+    func saveImageToCoreData(_ image: UIImage, tags: [String], date: Date) {
+        let context = PersistenceController.shared.container.viewContext
+        let newItem = CutoutImage(context: context)
+        newItem.id = UUID()
+        newItem.createdAt = date
+        newItem.tags = tags.joined(separator: ",")
+        newItem.image = image // Transformer will handle conversion
+
+        do {
+            try context.save()
+            print("✅ Saved cutout to Core Data as binary data")
+        } catch {
+            print("❌ Failed to save image: \(error)")
+        }
+    }
+
 }
 
 //struct VisionView_Previews: PreviewProvider {
