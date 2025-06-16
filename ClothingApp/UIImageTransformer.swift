@@ -12,7 +12,7 @@ class UIImageTransformer: ValueTransformer {
     
     override func transformedValue(_ value: Any?) -> Any? {
         guard let image = value as? UIImage else { return nil }
-        return image.jpegData(compressionQuality: 1.0)
+        return image.pngData()
     }
     
     override func reverseTransformedValue(_ value: Any?) -> Any? {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreData
 
 class OutfitBuilderViewModel: ObservableObject {
     /// Published - to mark properties that, when changed, should trigger view updates
@@ -27,12 +28,18 @@ class OutfitBuilderViewModel: ObservableObject {
         clothingPages[.hats] = ClothingPage(items: hats, selectedItemIndex: 1, currentPage: 2, totalPages: 3)
         
         // Set up tops
-        let tops = [
+        let cutoutTops = loadCutoutsFromCoreData()
+        let tops = cutoutTops + [
             ClothingItem(name: "Gray T-Shirt", imageName: "tshirt_cyan", category: .tops),
             ClothingItem(name: "Blue T-Shirt", imageName: "tshirt_blue", category: .tops),
-            ClothingItem(name: "Gray T-Shirt 2", imageName: "tshirt_red", category: .tops)
+            ClothingItem(name: "Red T-Shirt", imageName: "tshirt_red", category: .tops)
         ]
-        clothingPages[.tops] = ClothingPage(items: tops, selectedItemIndex: 1, currentPage: 2, totalPages: 3)
+        clothingPages[.tops] = ClothingPage(
+            items: tops,
+            selectedItemIndex: 0,
+            currentPage: 1,
+            totalPages: tops.count
+        )
         
         // Set up bottoms
         let bottoms = [
@@ -54,6 +61,7 @@ class OutfitBuilderViewModel: ObservableObject {
     func selectItem(category: ClothingCategory, index: Int) {
         guard var page = clothingPages[category], index < page.items.count else { return }
         page.selectedItemIndex = index
+        page.currentPage = index + 1
         clothingPages[category] = page
     }
     
@@ -75,6 +83,12 @@ class OutfitBuilderViewModel: ObservableObject {
         }
     }
     
+    func updatePage(for category: ClothingCategory, page: Int) {
+        guard var pageData = clothingPages[category] else { return }
+        pageData.currentPage = page
+        clothingPages[category] = pageData
+    }
+    
     func createOutfit() {
         // Logic to save the current outfit
         print("Creating outfit with selected items")
@@ -83,5 +97,36 @@ class OutfitBuilderViewModel: ObservableObject {
     func swapOutfits() {
         // Logic to randomly swap outfit items
         print("Swapping outfit items")
+    }
+    
+    func loadCutoutsFromCoreData() -> [ClothingItem] {
+        let context = PersistenceController.shared.container.viewContext
+        let request: NSFetchRequest<CutoutImage> = CutoutImage.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+        
+        do {
+            let results = try context.fetch(request)
+            
+            let tops = results.filter {
+                ($0.tags?.contains("cutout") == true) || ($0.tags?.contains("tops") == true)
+            }
+            
+            let items: [ClothingItem] = tops.compactMap { cutout in
+                guard let image = cutout.image as? UIImage,
+                      let id = cutout.id else { return nil }
+                
+                return ClothingItem(
+                    name: "Saved T-Shirt",
+                    imageName: id.uuidString,
+                    category: .tops,
+                    uiImage: image
+                )
+            }
+            
+            return items
+        } catch {
+            print("❌ Failed to load cutouts: \(error)")
+            return []
+        }
     }
 }

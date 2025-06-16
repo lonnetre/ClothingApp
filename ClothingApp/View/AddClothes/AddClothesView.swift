@@ -128,7 +128,7 @@ struct AddClothesView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.blue)
                                 Text(item)
-                                    .font(.system(size: 14))
+                                    .font(.footnote)
                             }
                         }
                     }
@@ -140,13 +140,13 @@ struct AddClothesView: View {
                         Button(action: {
                             showCamera = true
                         }) {
-                            PhotoOptionButton(icon: "camera.fill", label: "Take a photo", width: geometry.size.width / 2.3)
+                            OptionButton(icon: "camera.fill", label: "Take a photo", width: geometry.size.width / 2.3)
                         }
 
                         Button(action: {
                             // Add photo picker logic here
                         }) {
-                            PhotoOptionButton(icon: "photo.fill.on.rectangle.fill", label: "Use already\nexisting photo", width: geometry.size.width / 2.3)
+                            OptionButton(icon: "photo.fill.on.rectangle.fill", label: "Use library", width: geometry.size.width / 2.3)
                         }
                     }
                     .padding(.horizontal)
@@ -163,27 +163,5 @@ struct AddClothesView: View {
                 }
             }
         }
-    }
-}
-
-struct PhotoOptionButton: View {
-    let icon: String
-    let label: String
-    let width: CGFloat
-
-    var body: some View {
-        VStack(spacing: 2) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(Color(.label))
-            Text(label)
-                .font(.footnote)
-                .foregroundStyle(Color(.label))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(width: width, height: 70)
-        .background(Color(.systemGray5))
-        .cornerRadius(20)
     }
 }

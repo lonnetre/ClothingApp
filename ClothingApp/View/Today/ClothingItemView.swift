@@ -14,13 +14,16 @@ struct ClothingItemView: View {
     let onTap: () -> Void
     
     var body: some View {
-        Image(item.imageName)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(height: CGFloat(height))
-            .opacity(isSelected ? 1.0 : 0.5)
-            .onTapGesture {
-                onTap()
-            }
+        if let uiImage = item.uiImage {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: CGFloat(height))
+        } else {
+            Image(item.imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(height: CGFloat(height))
+        }
     }
 }

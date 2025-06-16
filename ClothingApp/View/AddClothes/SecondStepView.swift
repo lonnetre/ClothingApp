@@ -77,7 +77,7 @@ struct SecondStepView: View {
                     }
                     .animation(.easeInOut(duration: durations.transition), value: isSuccessState)
                 }
-                .animation(.spring(response: 0, dampingFraction: 0.7), value: animationPhase)
+                .animation(.spring(response: 1.0, dampingFraction: 0.7), value: animationPhase)
                 
                 Spacer()
             }
@@ -163,8 +163,10 @@ struct SecondStepView: View {
     private func startAnimationSequence() {
         runDelayed(0.5) {
             animationPhase = .phoneRaised
-            
-            animationPhase = .tshirtVisible
+
+            runDelayed(0.5) {
+                animationPhase = .tshirtVisible
+            }
             
             // After 3 seconds, transition from error state to success state
             runDelayed(3.0) {

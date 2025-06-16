@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct ClothingItem: Identifiable {
-    let id = UUID()
+struct ClothingItem {
     let name: String
     let imageName: String
     let category: ClothingCategory
+    var uiImage: UIImage? = nil
 }

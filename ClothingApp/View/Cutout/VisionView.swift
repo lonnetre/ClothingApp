@@ -10,6 +10,7 @@ struct VisionView: View {
 //    @State private var image: UIImage = UIImage.appleTest
     @State private var cutout: UIImage?
     @State var isLoading: Bool = false
+    @State private var didRunCutout = false
     let image: UIImage // Change from @State to let, passed from CameraView
     let autoCreateCutout: Bool
     
@@ -17,29 +18,36 @@ struct VisionView: View {
     private let processingQueue = DispatchQueue(label: "ProcessingQueue")
 
     var body: some View {
-        VStack {
-            if isLoading {
-                ProgressView("Creating cutout...")
-            } else {
-                // Display the original image and cutout (if created)
-                CutoutView(image: .constant(image), cutout: $cutout)
-            }
-
-            if cutout != nil && autoCreateCutout {
-                Button(action: {
-                }) {
-                    Image(systemName: "arrow.trianglehead.2.clockwise.rotate.90.camera.fill")
-                        .font(.system(size: 30))
-                        .foregroundColor(Color(UIColor.label))
-                        .padding()
+        GeometryReader { geometry in
+            VStack {
+                if isLoading {
+                    ProgressView("Creating cutout...")
+                } else {
+                    // Display the original image and cutout (if created)
+                    CutoutView(image: .constant(image), cutout: $cutout)
+                }
+                
+                if cutout != nil && autoCreateCutout {
+                    HStack {
+                        Button(action: {
+                            // action
+                        }) {
+                            OptionButton(icon: "camera.fill", label: "Retry", width: geometry.size.width / 2.3)
+                        }
+                        Button(action: {
+                            // action
+                        }) {
+                            OptionButton(icon: "house.fill", label: "Return to home page", width: geometry.size.width / 2.3)
+                        }
+                    }
                 }
             }
-        }
-        .padding()
-        .onAppear {
-            // If autoCreateCutout is true, start processing when the view loads
-            if autoCreateCutout {
-                createCutout()
+            .padding()
+            .onAppear {
+                if autoCreateCutout && !didRunCutout {
+                    didRunCutout = true
+                    createCutout()
+                }
             }
         }
     }
@@ -122,16 +130,21 @@ struct VisionView: View {
     }
 
     /// render the image from CIImage -> UIImage after the manipulations
-    private func render(ciImage: CIImage) -> UIImage {
-        let context = CIContext()
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
+    func render(ciImage: CIImage) -> UIImage {
+        let context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+
+        // Ensure premultiplied alpha for transparent background
+        let format = CIFormat.RGBA8
+        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent, format: format, colorSpace: colorSpace) else {
             return UIImage()
         }
-        return UIImage(cgImage: cgImage)
+
+        return UIImage(cgImage: cgImage, scale: UIScreen.main.scale, orientation: .up)
     }
     
     func saveImageToDocuments(_ image: UIImage, fileName: String) -> URL? {
-        guard let data = image.jpegData(compressionQuality: 0.9) else { return nil }
+        guard let data = image.pngData() else { return nil }
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName)
         
         do {
@@ -153,16 +166,11 @@ struct VisionView: View {
 
         do {
             try context.save()
-            print("✅ Saved cutout to Core Data as binary data")
+            print("Saved cutout to Core Data as binary data")
         } catch {
-            print("❌ Failed to save image: \(error)")
+            print("Failed to save image: \(error)")
         }
     }
 
 }
 
-//struct VisionView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        VisionView(image: UIImage(systemName: "apple-test")!)
-//    }
-//}
