@@ -1,4 +1,7 @@
 //
+//  VisionView.swift
+//  CustomCameraApp
+//
 //  Created by yehor on 03.05.25.
 //
 
@@ -11,46 +14,145 @@ struct VisionView: View {
     @State private var cutout: UIImage?
     @State var isLoading: Bool = false
     @State private var didRunCutout = false
-    let image: UIImage // Change from @State to let, passed from CameraView
+    let image: UIImage
     let autoCreateCutout: Bool
+    
+    @State private var selectedDetent: PresentationDetent = .height(200)
+    
+    @State private var isTagSheetPresented = false
+    @State private var selectedTagIcon: String = "tshirt.fill"
+    @State private var customTagLabel: String = ""
+    @State private var isMainSheetPresented = true
     
     /// add a separate queue to prevent main thread blocking
     private let processingQueue = DispatchQueue(label: "ProcessingQueue")
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack {
-                if isLoading {
-                    ProgressView("Creating cutout...")
-                } else {
-                    // Display the original image and cutout (if created)
-                    CutoutView(image: .constant(image), cutout: $cutout)
-                }
-                
-                if cutout != nil && autoCreateCutout {
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                // Top bar with back
+                ZStack {
+                    // Centered title
+                    Text("Choose the tags")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
                     HStack {
                         Button(action: {
-                            // action
+                            // Handle back navigation
                         }) {
-                            OptionButton(icon: "camera.fill", label: "Retry", width: geometry.size.width / 2.3)
+                            Image(systemName: "chevron.left")
+                                .font(.title2)
+                                .foregroundColor(.secondary)
                         }
-                        Button(action: {
-                            // action
-                        }) {
-                            OptionButton(icon: "house.fill", label: "Return to home page", width: geometry.size.width / 2.3)
-                        }
+                        Spacer()
                     }
                 }
-            }
-            .padding()
-            .onAppear {
-                if autoCreateCutout && !didRunCutout {
-                    didRunCutout = true
-                    createCutout()
+                .padding([.top, .horizontal], 16)
+
+
+                // Image Preview Area
+                VStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color(UIColor.systemGray6))
+
+                        if isLoading {
+                            ProgressView("Creating cutout...")
+                        } else {
+                            CutoutView(image: .constant(image), cutout: $cutout)
+                                .aspectRatio(contentMode: .fit)
+                                .padding()
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: UIScreen.main.bounds.height * 0.55)
+                    .clipped()
+
+                    // Retry button under image
+                    Button(action: {
+                        didRunCutout = false
+                        createCutout()
+                    }) {
+                        Label("Retry", systemImage: "arrow.counterclockwise")
+                            .font(.subheadline)
+                    }
                 }
+                .padding()
+
+                Spacer()
+            }
+            .sheet(isPresented: $isMainSheetPresented) {
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 6) {
+                            tagRow(pill: CustomPill(icon: "tshirt.fill", label: "Tops"), value: "T-shirt")
+                            tagRow(pill: CustomPill(icon: "paintbrush.fill", label: "Color"), value: "●")
+                            tagRow(pill: CustomPill(icon: "thermometer.variable", label: "Weather"), value: "Sunny")
+                            tagRow(pill: CustomPill(icon: "dollarsign.circle.fill", label: "Price"), value: "30")
+
+                            MatchingBanner()
+                                .padding(.top, 8)
+                                .padding(.horizontal, -16)
+                        }
+                        .padding(.top, 16)
+                        .padding(.horizontal)
+                    }
+
+                    // Save button pinned to bottom
+                    Button(action: {
+                        // Save logic
+                    }) {
+                        Text("Save")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(16)
+                    }
+                    .padding([.horizontal, .bottom], 16)
+                }
+                .presentationDetents([.height(200), .large], selection: $selectedDetent)
+                .interactiveDismissDisabled()
+                .presentationBackgroundInteraction(.enabled(upThrough: .height(200)))
+                .presentationCornerRadius(24)
+                
+                .sheet(isPresented: $isTagSheetPresented) {
+                    TagSelectorSheet(
+                        isPresented: $isTagSheetPresented,
+                        selectedIcon: $selectedTagIcon,
+                        customLabel: $customTagLabel
+                    )
+                }
+            }
+
+        }
+        .onAppear {
+            if autoCreateCutout && !didRunCutout {
+                didRunCutout = true
+                createCutout()
             }
         }
     }
+    
+    func tagRow(pill: CustomPill, value: String) -> some View {
+        HStack {
+            pill
+            Spacer()
+            Text(value)
+                .foregroundColor(.secondary)
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 6)
+        .onTapGesture {
+            if pill.icon == "tshirt.fill" {
+                selectedTagIcon = pill.icon
+                customTagLabel = value
+                isTagSheetPresented = true
+            }
+        }
+    }
+
 
     /// 1. generate mask image
     /// 2. apply it to the original image
@@ -174,3 +276,9 @@ struct VisionView: View {
 
 }
 
+#Preview {
+    VisionView(
+        image: UIImage(named: "tshirt_gray") ?? UIImage(), // Replace with a real asset name
+        autoCreateCutout: false
+    )
+}
